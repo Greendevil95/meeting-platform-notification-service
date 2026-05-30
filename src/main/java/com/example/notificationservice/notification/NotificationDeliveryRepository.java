@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface EmailDeliveryRepository extends JpaRepository<EmailDeliveryEntity, UUID> {
+public interface NotificationDeliveryRepository extends JpaRepository<NotificationDeliveryEntity, UUID> {
 }

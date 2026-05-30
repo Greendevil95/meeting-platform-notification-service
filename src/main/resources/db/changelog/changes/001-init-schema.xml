@@ -157,4 +157,13 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="007-generalize-notification-deliveries" author="Denis Bondarev">
+        <renameTable oldTableName="email_deliveries" newTableName="notification_deliveries"/>
+        <renameColumn
+                tableName="notification_deliveries"
+                oldColumnName="email"
+                newColumnName="destination"
+                columnDataType="VARCHAR(255)"/>
+    </changeSet>
 </databaseChangeLog>

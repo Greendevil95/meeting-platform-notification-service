@@ -23,7 +23,7 @@ class NotificationServiceTest {
     private NotificationRepository notificationRepository;
 
     @Mock
-    private EmailDeliveryRepository emailDeliveryRepository;
+    private NotificationDeliveryRepository notificationDeliveryRepository;
 
     @Mock
     private NotificationMetrics notificationMetrics;
@@ -32,10 +32,10 @@ class NotificationServiceTest {
     private final JsonMapper jsonMapper = JsonMapper.builder().findAndAddModules().build();
 
     @Test
-    void recordsMetricsWhenNotificationAndEmailDeliveryAreCreated() {
+    void recordsMetricsWhenNotificationAndDeliveryAreCreated() {
         NotificationService service = new NotificationService(
                 notificationRepository,
-                emailDeliveryRepository,
+                notificationDeliveryRepository,
                 notificationContentBuilder,
                 jsonMapper,
                 notificationMetrics
@@ -57,17 +57,18 @@ class NotificationServiceTest {
         );
 
         verify(notificationMetrics).recordNotificationCreated(NotificationType.USER_CREATED, NotificationAggregateType.USER);
-        verify(notificationMetrics).recordEmailDeliveryCreated(NotificationType.USER_CREATED);
-        ArgumentCaptor<EmailDeliveryEntity> emailDeliveryCaptor = ArgumentCaptor.forClass(EmailDeliveryEntity.class);
-        verify(emailDeliveryRepository).save(emailDeliveryCaptor.capture());
-        assertEquals("user@example.com", emailDeliveryCaptor.getValue().getEmail());
+        verify(notificationMetrics).recordNotificationDeliveryCreated(NotificationType.USER_CREATED, NotificationChannel.EMAIL);
+        ArgumentCaptor<NotificationDeliveryEntity> deliveryCaptor = ArgumentCaptor.forClass(NotificationDeliveryEntity.class);
+        verify(notificationDeliveryRepository).save(deliveryCaptor.capture());
+        assertEquals(NotificationChannel.EMAIL, deliveryCaptor.getValue().getChannel());
+        assertEquals("user@example.com", deliveryCaptor.getValue().getDestination());
     }
 
     @Test
     void doesNotRecordMetricsForDuplicateNotification() {
         NotificationService service = new NotificationService(
                 notificationRepository,
-                emailDeliveryRepository,
+                notificationDeliveryRepository,
                 notificationContentBuilder,
                 jsonMapper,
                 notificationMetrics
@@ -91,8 +92,8 @@ class NotificationServiceTest {
         );
 
         verify(notificationRepository, never()).save(any());
-        verify(emailDeliveryRepository, never()).save(any());
+        verify(notificationDeliveryRepository, never()).save(any());
         verify(notificationMetrics, never()).recordNotificationCreated(any(), any());
-        verify(notificationMetrics, never()).recordEmailDeliveryCreated(any());
+        verify(notificationMetrics, never()).recordNotificationDeliveryCreated(any(), any());
     }
 }

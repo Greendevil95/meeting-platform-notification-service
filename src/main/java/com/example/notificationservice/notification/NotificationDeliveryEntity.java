@@ -21,8 +21,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "email_deliveries")
-public class EmailDeliveryEntity {
+@Table(name = "notification_deliveries")
+public class NotificationDeliveryEntity {
 
     @Id
     @UuidGenerator
@@ -36,8 +36,8 @@ public class EmailDeliveryEntity {
     @Column(name = "channel", nullable = false)
     private NotificationChannel channel;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+    @Column(name = "destination", nullable = false)
+    private String destination;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

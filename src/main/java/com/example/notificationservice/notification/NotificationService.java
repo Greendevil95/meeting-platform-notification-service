@@ -15,7 +15,7 @@ import java.util.UUID;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final EmailDeliveryRepository emailDeliveryRepository;
+    private final NotificationDeliveryRepository notificationDeliveryRepository;
     private final NotificationContentBuilder notificationContentBuilder;
     private final JsonMapper jsonMapper;
     private final NotificationMetrics notificationMetrics;
@@ -52,13 +52,13 @@ public class NotificationService {
         notificationMetrics.recordNotificationCreated(type, aggregateType);
 
         if (email != null && !email.isBlank()) {
-            EmailDeliveryEntity emailDelivery = new EmailDeliveryEntity();
-            emailDelivery.setNotification(savedNotification);
-            emailDelivery.setChannel(NotificationChannel.EMAIL);
-            emailDelivery.setEmail(email);
-            emailDelivery.setStatus(NotificationDeliveryStatus.PENDING);
-            emailDeliveryRepository.save(emailDelivery);
-            notificationMetrics.recordEmailDeliveryCreated(type);
+            NotificationDeliveryEntity delivery = new NotificationDeliveryEntity();
+            delivery.setNotification(savedNotification);
+            delivery.setChannel(NotificationChannel.EMAIL);
+            delivery.setDestination(email);
+            delivery.setStatus(NotificationDeliveryStatus.PENDING);
+            notificationDeliveryRepository.save(delivery);
+            notificationMetrics.recordNotificationDeliveryCreated(type, NotificationChannel.EMAIL);
         }
     }
 

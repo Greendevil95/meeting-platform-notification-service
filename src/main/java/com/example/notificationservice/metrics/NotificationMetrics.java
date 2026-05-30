@@ -1,6 +1,7 @@
 package com.example.notificationservice.metrics;
 
 import com.example.notificationservice.notification.NotificationAggregateType;
+import com.example.notificationservice.notification.NotificationChannel;
 import com.example.notificationservice.notification.NotificationType;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class NotificationMetrics {
 
     private static final String NOTIFICATIONS_CREATED = "app.notifications.created";
-    private static final String EMAIL_DELIVERIES_CREATED = "app.email_deliveries.created";
+    private static final String NOTIFICATION_DELIVERIES_CREATED = "app.notification_deliveries.created";
     private static final String KAFKA_EVENTS_SKIPPED = "app.kafka.events.skipped";
     private static final String KAFKA_EVENTS_DLT_ROUTED = "app.kafka.events.dlt.routed";
 
@@ -27,8 +28,11 @@ public class NotificationMetrics {
         ).increment();
     }
 
-    public void recordEmailDeliveryCreated(NotificationType type) {
-        meterRegistry.counter(EMAIL_DELIVERIES_CREATED, Tags.of("type", type.name())).increment();
+    public void recordNotificationDeliveryCreated(NotificationType type, NotificationChannel channel) {
+        meterRegistry.counter(
+                NOTIFICATION_DELIVERIES_CREATED,
+                Tags.of("type", type.name(), "channel", channel.name())
+        ).increment();
     }
 
     public void recordKafkaEventSkipped(String readModel, String reason) {

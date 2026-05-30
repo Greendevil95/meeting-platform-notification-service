@@ -1,6 +1,7 @@
 package com.example.notificationservice.metrics;
 
 import com.example.notificationservice.notification.NotificationAggregateType;
+import com.example.notificationservice.notification.NotificationChannel;
 import com.example.notificationservice.notification.NotificationType;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
@@ -27,12 +28,16 @@ class NotificationMetricsTest {
     }
 
     @Test
-    void recordsEmailDeliveryCreated() {
-        notificationMetrics.recordEmailDeliveryCreated(NotificationType.USER_CREATED);
+    void recordsNotificationDeliveryCreated() {
+        notificationMetrics.recordNotificationDeliveryCreated(NotificationType.USER_CREATED, NotificationChannel.EMAIL);
 
         assertEquals(
                 1.0,
-                meterRegistry.counter("app.email_deliveries.created", "type", "USER_CREATED").count()
+                meterRegistry.counter(
+                        "app.notification_deliveries.created",
+                        "type", "USER_CREATED",
+                        "channel", "EMAIL"
+                ).count()
         );
     }
 
