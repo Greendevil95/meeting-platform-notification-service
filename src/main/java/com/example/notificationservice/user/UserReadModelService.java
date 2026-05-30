@@ -1,5 +1,6 @@
 package com.example.notificationservice.user;
 
+import com.example.notificationservice.metrics.NotificationMetrics;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,13 +13,16 @@ public class UserReadModelService {
 
     private final UserReadModelRepository repository;
     private final UserReadModelMapper userReadModelMapper;
+    private final NotificationMetrics notificationMetrics;
 
     public UserReadModelService(
             UserReadModelRepository repository,
-            UserReadModelMapper userReadModelMapper
+            UserReadModelMapper userReadModelMapper,
+            NotificationMetrics notificationMetrics
     ) {
         this.repository = repository;
         this.userReadModelMapper = userReadModelMapper;
+        this.notificationMetrics = notificationMetrics;
     }
 
     @Transactional
@@ -44,6 +48,7 @@ public class UserReadModelService {
             return;
         }
         if (version <= entity.getVersion()) {
+            notificationMetrics.recordKafkaEventSkipped("user", "stale_version");
             return;
         }
         entity.setStatus(status);
@@ -65,6 +70,7 @@ public class UserReadModelService {
 
     private void applyIfNewerVersion(UserReadModelEntity existing, UserProfile profile) {
         if (profile.version() <= existing.getVersion()) {
+            notificationMetrics.recordKafkaEventSkipped("user", "stale_version");
             return;
         }
         userReadModelMapper.updateEntity(profile, existing);

@@ -1,6 +1,7 @@
 package com.example.notificationservice.config;
 
 import com.example.notificationservice.config.properties.KafkaRetryProperties;
+import com.example.notificationservice.metrics.NotificationMetrics;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +26,10 @@ public class NotificationKafkaConfig {
 
     @Bean
     public NotificationDltDestinationResolver notificationDltDestinationResolver(
-            @Value("${spring.kafka.consumer.group-id}") String consumerGroupId
+            @Value("${spring.kafka.consumer.group-id}") String consumerGroupId,
+            NotificationMetrics notificationMetrics
     ) {
-        return new NotificationDltDestinationResolver(consumerGroupId);
+        return new NotificationDltDestinationResolver(consumerGroupId, notificationMetrics);
     }
 
     @Bean

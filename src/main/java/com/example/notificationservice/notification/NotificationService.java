@@ -1,5 +1,6 @@
 package com.example.notificationservice.notification;
 
+import com.example.notificationservice.metrics.NotificationMetrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ public class NotificationService {
     private final EmailDeliveryRepository emailDeliveryRepository;
     private final NotificationContentBuilder notificationContentBuilder;
     private final JsonMapper jsonMapper;
+    private final NotificationMetrics notificationMetrics;
 
     @Transactional
     public void createNotification(
@@ -47,6 +49,7 @@ public class NotificationService {
         notification.setRead(false);
 
         NotificationEntity savedNotification = notificationRepository.save(notification);
+        notificationMetrics.recordNotificationCreated(type, aggregateType);
 
         if (email != null && !email.isBlank()) {
             EmailDeliveryEntity emailDelivery = new EmailDeliveryEntity();
@@ -55,6 +58,7 @@ public class NotificationService {
             emailDelivery.setEmail(email);
             emailDelivery.setStatus(NotificationDeliveryStatus.PENDING);
             emailDeliveryRepository.save(emailDelivery);
+            notificationMetrics.recordEmailDeliveryCreated(type);
         }
     }
 

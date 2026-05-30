@@ -1,5 +1,6 @@
 package com.example.notificationservice.meeting;
 
+import com.example.notificationservice.metrics.NotificationMetrics;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,13 +12,16 @@ public class MeetingReadModelService {
 
     private final MeetingReadModelRepository repository;
     private final MeetingReadModelMapper mapper;
+    private final NotificationMetrics notificationMetrics;
 
     public MeetingReadModelService(
             MeetingReadModelRepository repository,
-            MeetingReadModelMapper mapper
+            MeetingReadModelMapper mapper,
+            NotificationMetrics notificationMetrics
     ) {
         this.repository = repository;
         this.mapper = mapper;
+        this.notificationMetrics = notificationMetrics;
     }
 
     @Transactional
@@ -31,6 +35,7 @@ public class MeetingReadModelService {
     public void addParticipant(UUID meetingId, UUID userId, long version, OffsetDateTime eventTime) {
         repository.findById(meetingId).ifPresent(entity -> {
             if (version <= entity.getVersion()) {
+                notificationMetrics.recordKafkaEventSkipped("meeting", "stale_version");
                 return;
             }
 
@@ -51,6 +56,7 @@ public class MeetingReadModelService {
     public void removeParticipant(UUID meetingId, UUID userId, long version, OffsetDateTime eventTime) {
         repository.findById(meetingId).ifPresent(entity -> {
             if (version <= entity.getVersion()) {
+                notificationMetrics.recordKafkaEventSkipped("meeting", "stale_version");
                 return;
             }
 
@@ -78,6 +84,7 @@ public class MeetingReadModelService {
 
     private void applyIfNewerVersion(MeetingReadModelEntity existing, MeetingProfile profile) {
         if (profile.version() <= existing.getVersion()) {
+            notificationMetrics.recordKafkaEventSkipped("meeting", "stale_version");
             return;
         }
         mapper.updateEntity(profile, existing);
